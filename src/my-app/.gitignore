@@ -6,7 +6,7 @@
 .pnp.js
 
 # configuration files
-/config
+/src/config/gemini.js
 
 # testing
 /coverage

@@ -1,1 +1,1 @@
-const api_key = "fake key for testing";
+const api_key = "fake key";
