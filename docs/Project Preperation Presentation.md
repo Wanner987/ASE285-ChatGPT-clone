@@ -36,7 +36,7 @@ class: lead
 
 ---
 
-# Feature 2: Storing the current conversation
+# Feature 2: In depth conversions
 
 - Uses sessions to store the current conversation so the user can have a more in depth conversation
 
