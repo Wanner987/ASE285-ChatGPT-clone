@@ -7,7 +7,6 @@ const App = () => {
         <>
             <Sidebar/>
             <Main/>
-            <p>say hello</p>
         </>
     )
 }
