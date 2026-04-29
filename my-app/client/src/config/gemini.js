@@ -7,7 +7,7 @@ import {
 } from '@google/genai';
 
 let tempDisable = false;
-let GEMINI_API_KEY = "AIzaSyA_SXOOetN4nndDyJP-GbJKcjvCvq92IyA";
+let GEMINI_API_KEY = "";
 
 async function runChat(prompt, chatId) {
   const ai = new GoogleGenAI({
