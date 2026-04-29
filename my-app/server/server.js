@@ -1,12 +1,14 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors()); // Allows your React app to talk to this server
 app.use(express.json());
 
-const db = new sqlite3.Database('./data/chat_history.db', (err) => {
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'data', 'chat_history.db');
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error(err.message);
     console.log('Connected to the SQLite database.');
 });
@@ -152,4 +154,8 @@ app.delete('/api/history', (req, res) => {
     });
 });
 
-app.listen(5000, () => console.log('Backend running on http://localhost:5000'));
+if (require.main === module) {
+  app.listen(5000, () => console.log('Backend running on http://localhost:5000'));
+}
+
+module.exports = { app, db };

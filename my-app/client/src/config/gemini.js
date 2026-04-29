@@ -7,7 +7,7 @@ import {
 } from '@google/genai';
 
 let tempDisable = false;
-let GEMINI_API_KEY = "";
+let GEMINI_API_KEY = "INCERT YOUR GEMINI API KEY HERE";
 
 async function runChat(prompt, chatId) {
   const ai = new GoogleGenAI({
@@ -15,7 +15,7 @@ async function runChat(prompt, chatId) {
   });
 
   if (tempDisable) {
-    return 'Gemini API is temporarily disabled';
+    return 'This is temp disabled to not hit API key rate limits';
   }
 
   // Save the users prompt to the database and get the chat_id (new or existing)
