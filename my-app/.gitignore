@@ -7,8 +7,6 @@
 .pnp.js
 .env
 
-# configuration files
-/client/src/config
 
 # testing
 /coverage
