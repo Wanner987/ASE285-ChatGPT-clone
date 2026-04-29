@@ -10,52 +10,64 @@ let tempDisable = false;
 let GEMINI_API_KEY = "INCERT YOUR GEMINI API KEY HERE";
 
 async function runChat(prompt, chatId) {
-  const ai = new GoogleGenAI({
-    apiKey: GEMINI_API_KEY,
-  });
-
-  if (tempDisable) {
-    return 'This is temp disabled to not hit API key rate limits';
-  }
-
-  // Save the users prompt to the database and get the chat_id (new or existing)
+  // Save the user's prompt to the database and get the chat_id (new or existing)
   const userSaveResponse = await fetch('http://localhost:5000/api/save_chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-        chat_id: chatId, 
-        role: 'user',
-        parts: [{ text: prompt }] // Wrap the string in the parts array
-  })
+      chat_id: chatId,
+      role: 'user',
+      parts: [{ text: prompt }]
+    })
   });
-  
-  const userData = await userSaveResponse.json();
-  const currentChatId = userData.chat_id; // Capture the ID (new or existing)
 
-  console.log("Current Chat ID:", currentChatId);
+  const userData = await userSaveResponse.json();
+  const currentChatId = userData.chat_id;
+
+  console.log('Current Chat ID:', currentChatId);
+
+  const useMockResponse = tempDisable || !GEMINI_API_KEY || GEMINI_API_KEY.includes('INCERT');
+
+  const currentConversationContext = await fetch(`http://localhost:5000/api/history/${currentChatId}`);
+  const currentConversationContextJson = await currentConversationContext.json();
+
+  if (useMockResponse) {
+    const mockResponse = `Mocked Gemini reply for: ${prompt}`;
+
+    await fetch('http://localhost:5000/api/save_chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: currentChatId,
+        role: 'model',
+        parts: [{ text: mockResponse }]
+      })
+    });
+
+    return [mockResponse, currentChatId];
+  }
+
+  const ai = new GoogleGenAI({
+    apiKey: GEMINI_API_KEY,
+  });
 
   const tools = [
     {
-      googleSearch: {
-      }
+      googleSearch: {}
     },
   ];
+
   const config = {
-    
     tools,
   };
   const model = 'gemini-2.5-flash';
-  
-  const currentConversationContext = await fetch(`http://localhost:5000/api/history/${currentChatId}`);
-  const currentConversationContextJson = await currentConversationContext.json();
-  
-  
+
   const contents = currentConversationContextJson.map(message => ({
     role: message.role,
     parts: message.parts
   }));
 
-  console.log("Contents:", currentConversationContextJson);
+  console.log('Contents:', currentConversationContextJson);
 
   const response = await ai.models.generateContentStream({
     model,
@@ -63,7 +75,6 @@ async function runChat(prompt, chatId) {
     contents,
   });
 
-  let fileIndex = 0;
   let fullResponse = '';
   for await (const chunk of response) {
     if (chunk.text) {
@@ -72,15 +83,14 @@ async function runChat(prompt, chatId) {
     }
   }
 
-  // Save the models full response to the database with the same chat_id
   await fetch('http://localhost:5000/api/save_chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-        chat_id: currentChatId, 
-        role: 'model', // Matches Gemini's role naming
-        parts: [{ text: fullResponse }] // Wrap the full AI response
-  })
+      chat_id: currentChatId,
+      role: 'model',
+      parts: [{ text: fullResponse }]
+    })
   });
 
   return [fullResponse, currentChatId];

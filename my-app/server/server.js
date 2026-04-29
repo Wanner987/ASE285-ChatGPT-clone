@@ -13,14 +13,23 @@ const db = new sqlite3.Database(dbPath, (err) => {
     console.log('Connected to the SQLite database.');
 });
 
-// Create the table for your chatbot history
-db.run(`CREATE TABLE IF NOT EXISTS messages (
+const ready = new Promise((resolve, reject) => {
+  db.run(`CREATE TABLE IF NOT EXISTS messages (
     message_id INTEGER PRIMARY KEY AUTOINCREMENT,
     chat_id INTEGER, 
     role TEXT, 
     parts TEXT,  
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
+  )`, (err) => {
+    if (err) {
+      console.error('Error creating messages table:', err.message);
+      reject(err);
+      return;
+    }
+    console.log('Messages table is ready.');
+    resolve();
+  });
+});
 
 // post 
 app.post('/api/save_chat', (req, res) => {
@@ -158,4 +167,4 @@ if (require.main === module) {
   app.listen(5000, () => console.log('Backend running on http://localhost:5000'));
 }
 
-module.exports = { app, db };
+module.exports = { app, db, ready };

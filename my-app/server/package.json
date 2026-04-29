@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "start": "node server.js",
+    "test": "jest",
+    "test:regression": "jest --runInBand __tests__/regression.test.js"
   },
   "keywords": [],
   "devDependencies": {
