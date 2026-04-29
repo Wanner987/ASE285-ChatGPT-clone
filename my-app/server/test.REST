@@ -1,0 +1,73 @@
+### Variables
+@baseUrl = http://localhost:5000/api
+
+### 
+# This mimics the first message sent in a conversation.
+# Note: Since we don't provide a chat_id, the server generates one using Date.now()
+### 1. New Chat (User First Prompt)
+POST {{baseUrl}}/save_chat
+Content-Type: application/json
+
+{
+    "role": "user",
+    "parts": [
+        {
+            "text": "Hello! Can you help me with a React project?"
+        }
+    ]
+}
+
+###
+
+### 2. Follow-up Message (User)
+# Using the same chat_id to maintain the thread
+POST {{baseUrl}}/save_chat
+Content-Type: application/json
+
+{
+    "chat_id": 1777490045413,
+    "role": "user",
+    "parts": [
+        {
+            "text": "Hello there"
+        }
+    ]
+}
+
+###
+
+### 3. Model Response
+# Note: Changed role to "model" to align with Gemini's naming convention
+POST {{baseUrl}}/save_chat
+Content-Type: application/json
+
+{
+    "chat_id": 1777490045413,
+    "role": "model",
+    "parts": [
+        {
+            "text": "Of course! What part of React are you working on?"
+        }
+    ]
+}
+
+###
+
+### 3. Get Chat History (Sidebar List)
+# This calls your /api/history endpoint to get the first message of every chat.
+# Used to populate the sidebar map() we discussed earlier.
+GET {{baseUrl}}/history
+
+###
+
+# This tests your logic that reverses the order and slices to the last 10 messages.
+GET {{baseUrl}}/history/1777491644040
+
+
+### Delete a specific chat
+DELETE {{baseUrl}}/history/1777490045413
+
+###
+
+### Wipe the entire database history
+DELETE {{baseUrl}}/history

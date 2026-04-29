@@ -11,6 +11,7 @@ const ContextProvider = (props) => {
     const [showResult, setShowResult] = useState(false);
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState("");
+    const [currentChatId, setCurrentChatId] = useState(undefined);
 
     const delayPara = (index, nextWord) => {
         setTimeout(function() {
@@ -21,6 +22,7 @@ const ContextProvider = (props) => {
     const newChat = () => {
         setLoading(false);
         setShowResult(false);
+        setCurrentChatId(undefined);
     }
 
     const onSent = async (prompt) => {
@@ -32,12 +34,17 @@ const ContextProvider = (props) => {
         let actualPrompt = prompt ?? input;
 
         setRecentPrompt(actualPrompt);
-        if (prompt === undefined) {
+        if (prompt === undefined) { // the prompt comes from main component, all first messages in chats
             setPreviousPrompts(prev => [...prev, actualPrompt]);
         }
 
-        const response = await runChat(actualPrompt);
-        let responceArray = response.split("**");
+        let response = await runChat(actualPrompt, currentChatId);
+        let modelResponse = response[0];
+        setCurrentChatId(response[1]);
+        console.log("chat id in context: ", response[1])
+
+        // text formatting logic
+        let responceArray = modelResponse.split("**");
         let newResponce="";
         for (let i = 0; i < responceArray.length; i++) {
             if (i % 2 === 0 || i === 0) {
@@ -49,6 +56,7 @@ const ContextProvider = (props) => {
         }
         newResponce = newResponce.split("*").join("</br>");
 
+        // delayed printing logic
         let newResponceArray = newResponce.split(" ");
         for (let i = 0; i < newResponceArray.length; i++) {
             const nextWord = newResponceArray[i];

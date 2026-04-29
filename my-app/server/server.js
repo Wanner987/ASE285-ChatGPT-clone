@@ -16,34 +16,38 @@ db.run(`CREATE TABLE IF NOT EXISTS messages (
     message_id INTEGER PRIMARY KEY AUTOINCREMENT,
     chat_id INTEGER, 
     role TEXT, 
-    content TEXT,
+    parts TEXT,  
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 )`);
 
 // post 
 app.post('/api/save_chat', (req, res) => {
-    const { chat_id, role, content } = req.body;
+    const { chat_id, role, parts } = req.body; // Expecting 'parts' as an array
 
-    // 1. Determine the ID (if no chat_id provided, we'll generate a new one)
-    // We use a timestamp or a random number if chat_id is null
     const targetChatId = chat_id || Date.now(); 
 
-    // 2. Insert the new message
-    const insertSql = `INSERT INTO messages (chat_id, role, content) VALUES (?, ?, ?)`;
+    // 1. Convert the parts array to a JSON string for storage
+    const partsJson = JSON.stringify(parts);
+    const insertSql = `INSERT INTO messages (chat_id, role, parts) VALUES (?, ?, ?)`;
     
-    db.run(insertSql, [targetChatId, role, content], function(err) {
+    db.run(insertSql, [targetChatId, role, partsJson], function(err) {
         if (err) return res.status(500).json({ error: err.message });
 
-        // 3. IMMEDIATELY fetch the whole history for this chat_id to return to React
-        const selectSql = `SELECT role, content, timestamp FROM messages WHERE chat_id = ? ORDER BY timestamp ASC`;
+        const selectSql = `SELECT role, parts, timestamp FROM messages WHERE chat_id = ? ORDER BY timestamp ASC`;
         
         db.all(selectSql, [targetChatId], (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
 
-            // 4. Send back the chat_id and the full list of messages
+            // 2. Map through rows to parse the 'parts' string back into a real JS array
+            const history = rows.map(row => ({
+                role: row.role,
+                parts: JSON.parse(row.parts),
+                timestamp: row.timestamp
+            }));
+
             res.status(200).json({
                 chat_id: targetChatId,
-                history: rows
+                history: history
             });
         });
     });
@@ -53,7 +57,7 @@ app.post('/api/save_chat', (req, res) => {
 app.get('/api/history', (req, res) => {
     // This query finds the first message for every unique chat_id
     const sql = `
-        SELECT chat_id, content, MIN(timestamp) as time
+        SELECT chat_id, parts, MIN(timestamp) as time
         FROM messages 
         WHERE role = 'user'
         GROUP BY chat_id 
@@ -65,8 +69,14 @@ app.get('/api/history', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
         
-        // Returns an array of objects: [{chat_id: 123, content: "Hello AI", time: "..."}, ...]
-        res.status(200).json(rows);
+        // Returns an array of objects: [{chat_id: 123, parts: [...], time: "..."}, ...]
+        const formattedRows = rows.map(row => ({
+            chat_id: row.chat_id,
+            parts: JSON.parse(row.parts), // Convert the string back to an array
+            time: row.time
+        }));
+        
+        res.status(200).json(formattedRows);
     });
 });
 
@@ -78,7 +88,7 @@ app.get('/api/history/:chat_id', (req, res) => {
     // enough room to find a starting "user" message while still 
     // ending up with roughly 10.
     const sql = `
-        SELECT role, content, timestamp 
+        SELECT role, parts, timestamp
         FROM messages 
         WHERE chat_id = ? 
         ORDER BY timestamp DESC 
@@ -88,11 +98,17 @@ app.get('/api/history/:chat_id', (req, res) => {
     db.all(sql, [chat_id], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
 
-        // 1. SQL 'ORDER BY DESC' gives us newest first. 
+        // 'ORDER BY DESC' gives us newest first. 
         // We reverse it immediately to get chronological order.
         let history = rows.reverse();
 
-        // 2. Logic: Remove messages from the start until the first message is 'user'
+        history = rows.map(row => ({
+            role: row.role,
+            parts: JSON.parse(row.parts),
+            timestamp: row.timestamp
+        }));
+
+        // Remove messages from the start until the first message is 'user'
         while (history.length > 0 && history[0].role !== 'user') {
             history.shift();
         }
@@ -101,6 +117,38 @@ app.get('/api/history/:chat_id', (req, res) => {
         const finalHistory = history.slice(-10);
 
         res.status(200).json(finalHistory);
+    });
+});
+
+// 1. Delete a specific chat by its ID
+app.delete('/api/history/:chat_id', (req, res) => {
+    const { chat_id } = req.params;
+    const sql = `DELETE FROM messages WHERE chat_id = ?`;
+
+    db.run(sql, [chat_id], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        // 'this.changes' returns the number of rows deleted
+        res.status(200).json({ 
+            message: `Deleted chat ${chat_id}`, 
+            deletedCount: this.changes 
+        });
+    });
+});
+
+// 2. Clear ALL history from the database
+app.delete('/api/history', (req, res) => {
+    const sql = `DELETE FROM messages`;
+
+    db.run(sql, [], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(200).json({ 
+            message: "All history cleared", 
+            deletedCount: this.changes 
+        });
     });
 });
 
