@@ -5,7 +5,7 @@ paginate: true
 class: lead
 ---
 
-# Design and Architecture: ASE285-ChatGPT-clone
+# Design and Architecture: Gemini Clone
 
 ## 🏗 High-Level Architecture
 This project follows a **Client-Server (Full Stack)** architecture, separating the concerns of the user interface from the backend logic and data persistence.

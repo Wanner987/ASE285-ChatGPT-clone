@@ -5,7 +5,7 @@ paginate: true
 class: lead
 ---
 
-# User Manual: Setting Up the ASE285-ChatGPT-clone
+# User Manual: Setting Up the Gemini Clone
 
 This guide will help you configure your environment and launch the full-stack chat application using the Google Gemini API.
 
