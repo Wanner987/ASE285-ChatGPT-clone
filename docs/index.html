@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Documentation: ASE285-ChatGPT-clone</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+            background-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #0f172a;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 4px solid #3b82f6;
+            border-radius: 8px 8px 0 0;
+        }
+
+        h1 { margin: 0; font-size: 20pt; }
+        h2 { 
+            color: #1e40af; 
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            font-size: 16pt;
+        }
+        h3 { color: #334155; font-size: 13pt; margin-top: 20px; }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        code, pre {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background-color: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10pt;
+        }
+
+        pre {
+            display: block;
+            padding: 12px;
+            white-space: pre-wrap;
+            border: 1px solid #e2e8f0;
+            line-height: 1.4;
+            color: #334155;
+            margin: 10px 0;
+        }
+
+        .file-tree {
+            background-color: #1e293b;
+            color: #f1f5f9;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .step {
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 3px solid #cbd5e1;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2563eb;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .important-note {
+            background-color: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-size: 10pt;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 9pt;
+            color: #94a3b8;
+            margin-top: 30px;
+        }
+
+        a { color: #2563eb; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project Documentation</h1>
+            <p>ASE285-ChatGPT-clone Architecture & User Manual</p>
+        </header>
+
+        <div class="section">
+            <h2>🏗 Design & Architecture</h2>
+            <p>The application utilizes a <strong>Decoupled Full-Stack Architecture</strong>, separating the React-based frontend from the Node.js/Express backend to ensure modularity and ease of maintenance.</p>
+            
+            <h3>Simplified File Structure</h3>
+            <pre class="file-tree">my-app
+├── client/          # React Frontend (UI & State)
+│   ├── config/      # API Keys (gemini.js)
+│   └── src/         # Components & Context
+├── server/          # Node.js/Express Backend
+│   ├── data/        # SQLite Storage
+│   └── server.js    # API Endpoints
+└── run.sh           # Main Execution Script</pre>
+
+            <h3>Technical Overview</h3>
+            <ul>
+                <li><strong>Frontend:</strong> Managed via React Context API to handle global chat state. Styles are component-scoped for clarity.</li>
+                <li><strong>Backend:</strong> Acts as a secure proxy to the Gemini API and manages local persistence via SQLite.</li>
+                <li><strong>Integration:</strong> Seamless communication via RESTful API calls between the client and server.</li>
+            </ul>
+
+            <h2>📖 User Manual</h2>
+            <p>Follow these steps to get the application running on your local machine.</p>
+
+            <div class="step">
+                <span class="step-title">Step 1: Get your API Key</span>
+                <p>Go to <a href="https://aistudio.google.com/">Google AI Studio</a>. Click on <strong>"Get API key"</strong> in the sidebar. Create a new key and copy it to your clipboard.</p>
+            </div>
+
+            <div class="step">
+                <span class="step-title">Step 2: Configure the Client</span>
+                <p>Open <code>my-app/client/config/gemini.js</code> in your editor and paste your key:</p>
+                <pre>export const apiKey = "YOUR_API_KEY_HERE";</pre>
+            </div>
+
+            <div class="step">
+                <span class="step-title">Step 3: Launch the App</span>
+                <p>Open a terminal in the <code>my-app</code> folder and run:</p>
+                <pre>.
+un.sh</pre>
+            </div>
+
+            <div class="important-note">
+                <strong>Prerequisites:</strong> You must have <code>Node.js</code> installed. Ensure you have executed <code>npm install</code> in both the <code>/client</code> and <code>/server</code> directories prior to running the launch script.
+            </div>
+
+            <footer>
+                &copy; 2026 ASE285 Development Team
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
